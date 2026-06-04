@@ -1,2 +1,13 @@
-# Snatch-it-
-Lets test your reflexes! Snatch away the apples before somebody else snatches it, but be aware to not eat those candies (You don't wanna be a fatty, do you?)
+INTRODUCTION
+Lets test your reflexes! Snatch away the apples before somebody else snatches it, but be aware to not eat those malicious candies (You don't wanna be a fatty, do you?)
+
+HOW THE GAME WORKS
+This is a multiplayer game so don't forget to bring your friends, and if you don't have any friends well...just play with your family then :p So let me tell you how the game works, you will first come to an intro screen, there click 'start' and then you will be teleported to the home page, there choose your timer and your controls (don't worry it is given how the controls work) then click the 'play' button and the game will automatically start. Compete with your playmates to snatch the apples first, the one who gets it gets +1 point and the other who don't..well they get nothing, but, but, but, Do NOT take those candies if someone snatches it he gets -2 points, so beware of them. After the timer ends the one with the highest score wins and if someone gets the same score..wel it's a tie then, so in order to win the game be the person with the highest points.
+
+PROJECTS AND FILES
+I first started working on this game on folder-Project 1 after almost 5 hours of work the folder started to glitch, so I had to transfer all the files to a new folder-SnatchItWeb there I when I finally completed my project of 4 hours, the game was working as I imagined it to be, but the problem was that it was only working on my Pc python, and not on web. I wanted it to be a web playble game, and in order to ship this project I had to provide a URL for this game but I was not able to get a URL for this game. I wanted to write this game in python but this is my first project of python and I am not so-good in python plus I used cv2 also which is not broweser friendly at all, so I did not know what to do except write the whole code again but in a browser friendly language like HTML, Css And Javascript. I am a little better in these language so I rewrote the whole code of the game again. But I instead of making another folder I deleted all files in my Project 1 folder as I thought it would be a waste of almost 5 hours of coding go to Recycle Bin, and I started rewriting the whole code again in HTML Css And javaScript, but I did not delete my SnatchItWeb folder, there I kept my original code in python. So yeah, I rewrote the whole code but it was eazy as I knew my whole concept and I knew these languages better. 
+
+USE OF AI!
+As I said earlier this was my first time ever using python and I am not well knowledgable in this language and when sometimes my game started to glitch like crazy I used Vs code Ai chat to make sense of whatever was happening, I tried my best to solve the glitches on my ownn but sometimes they were like very bad, so only those time used AI otherwise NOT at all. So please tell me if this counts as an AI clop or not! 
+
+Anyways thanks for reading :) I hope you like the game.
