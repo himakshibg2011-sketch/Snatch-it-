@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Apple Snatch Multiplayer</title>
+  <style>
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#ffe4e6;color:#1f2937;display:flex;justify-content:center;min-height:100vh;align-items:center}
+    .frame{width:min(760px,95vw);padding:20px;border-radius:24px;background:#fff0f3;box-shadow:0 20px 50px rgba(139,92,246,.14)}
+    h1{margin:0 0 12px;font-size:26px;text-align:center;color:#1f2937}
+    .topbar{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:center;margin-bottom:14px}
+    .topbar select,.topbar button{border:none;border-radius:14px;padding:10px 14px;font-size:14px;cursor:pointer}
+    .topbar button{background:#2563eb;color:#ffffff}
+    .status{margin-bottom:16px;text-align:center;font-size:15px;color:#475569}
+    .board{position:relative;display:grid;place-items:center;height:260px;border:2px solid rgba(248,113,113,.4);border-radius:20px;margin-bottom:14px;background:#ffe8ee}
+    .fruit{font-size:96px;line-height:1}
+    .corner-button{position:absolute;width:72px;height:72px;border-radius:50%;border:none;background:#2563eb;color:#ffffff;cursor:pointer;box-shadow:0 10px 24px rgba(37,99,235,.25);transition:transform .15s ease}
+    .corner-button:active{transform:scale(.95)}
+    .top-left{top:14px;left:14px}
+    .top-right{top:14px;right:14px}
+    .bottom-left{bottom:14px;left:14px}
+    .bottom-right{bottom:14px;right:14px}
+    .message{margin-top:8px;text-align:center;color:#475569;font-size:15px}
+    .score-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px}
+    .player-card{padding:12px;border-radius:16px;background:rgba(148,163,184,.12);text-align:center}
+    .player-card strong{display:block;font-size:28px;margin-top:8px;color:#1f2937}
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/brython@3.10.5/brython_stdlib.js"></script>
+</head>
+<body onload="brython()">
+  <div class="frame">
+    <h1>Apple Snatch</h1>
+    <div class="topbar">
+      <div>
+        <button id="start">Start</button>
+        <button id="reset">Reset</button>
+      </div>
+      <div>
+        Players:
+        <select id="playerCount">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+        </select>
+      </div>
+      <div class="status">
+        Time: <strong id="timeLeft">60</strong>s • Next fruit in <strong id="nextDelay">0.0</strong>s
+      </div>
+    </div>
+
+    <div class="board">
+      <div class="fruit" id="fruitDisplay">?</div>
+      <button class="corner-button top-left" id="player3Btn" title="Grab"></button>
+      <button class="corner-button top-right" id="player4Btn" title="Grab"></button>
+      <button class="corner-button bottom-left" id="player2Btn" title="Grab"></button>
+      <button class="corner-button bottom-right" id="player1Btn" title="Grab"></button>
+    </div>
+    <div class="message" id="message">Press Start to begin. Use corner buttons or keys (A,D,W,S and arrow keys) to grab fruit.</div>
+
+    <div class="score-grid" id="scoreGrid"></div>
+  </div>
+
+  <script type="text/python">
+from browser import document, timer, window
+import random
+
+player_count = 4
+scores = [0, 0, 0, 0]
+fruit = None
+fruit_visible = False
+claimed = False
+fruit_timer = None
+countdown_timer = None
+countdown = 60
+next_delay = 0.0
+running = False
+
+fruit_display = document['fruitDisplay']
+message = document['message']
+time_left = document['timeLeft']
+next_delay_el = document['nextDelay']
+player_count_select = document['playerCount']
+start_btn = document['start']
+reset_btn = document['reset']
+score_grid = document['scoreGrid']
+player_buttons = [
+    document['player1Btn'],
+    document['player2Btn'],
+    document['player3Btn'],
+    document['player4Btn'],
+]
+
+KEY_BINDINGS = {
+    'd': 0,
+    's': 1,
+    'a': 2,
+    'w': 3,
+    'arrowright': 0,
+    'arrowdown': 1,
+    'arrowleft': 2,
+    'arrowup': 3,
+}
+
+def set_player_count(ev=None):
+    global player_count
+    player_count = int(player_count_select.value)
+    update_buttons()
+    reset()
+
+def draw_scores():
+    score_grid.clear()
+    for i in range(player_count):
+        card = document.createElement('div')
+        card.className = 'player-card'
+        card.innerHTML = f'Player {i+1}<strong>{scores[i]}</strong>'
+        score_grid <= card
+
+def update_buttons():
+    for i, btn in enumerate(player_buttons):
+        btn.style.display = 'block' if i < player_count else 'none'
+
+def bind_claim(btn, index):
+    def handler(ev):
+        claim(index)
+    btn.bind('click', handler)
+
+def choose_fruit():
+    return 'sweet' if random.random() < 0.4 else 'apple'
+
+def show_fruit():
+    global fruit, fruit_visible, claimed, fruit_timer
+    fruit = choose_fruit()
+    fruit_visible = True
+    claimed = False
+    fruit_display.text = '🍎' if fruit == 'apple' else '🍬'
+    fruit_display.style.color = '#facc15' if fruit == 'apple' else '#f472b6'
+    message.text = 'Grab the fruit now!'
+    fruit_timer = timer.set_timeout(miss_fruit, 3750)
+
+def miss_fruit():
+    global fruit_visible, fruit_timer
+    fruit_visible = False
+    fruit_display.text = '⏳'
+    message.text = 'Too slow! Waiting for the next fruit.'
+    fruit_timer = None
+    schedule_next_fruit()
+
+def schedule_next_fruit():
+    global next_delay, fruit_timer
+    if not running:
+        return
+    next_delay = round(random.uniform(0.75, 3.75), 1)
+    next_delay_el.text = f'{next_delay:.1f}'
+    fruit_timer = timer.set_timeout(show_fruit, int(next_delay * 1000))
+
+def claim(index):
+    global fruit_visible, claimed, fruit_timer
+    if not running or not fruit_visible or claimed:
+        return
+    claimed = True
+    fruit_visible = False
+    if fruit_timer:
+        timer.clear_timeout(fruit_timer)
+        fruit_timer = None
+    if fruit == 'apple':
+        scores[index] += 1
+        message.text = f'Player {index+1} snatched the apple! +1 point.'
+    else:
+        scores[index] -= 2
+        message.text = f'Player {index+1} grabbed the sweet! -2 points.'
+    fruit_display.text = '✓'
+    draw_scores()
+    schedule_next_fruit()
+
+def update_countdown():
+    global countdown
+    countdown -= 1
+    time_left.text = str(countdown)
+    if countdown <= 0:
+        stop_game()
+
+def stop_game():
+    global running, fruit_timer, countdown_timer, fruit_visible
+    running = False
+    if fruit_timer:
+        timer.clear_timeout(fruit_timer)
+        fruit_timer = None
+    if countdown_timer:
+        timer.clear_interval(countdown_timer)
+    fruit_visible = False
+    fruit_display.text = '⏹'
+    winner_text = determine_winner()
+    message.text = f'Game over! {winner_text}'
+    next_delay_el.text = '0.0'
+
+def determine_winner():
+    best = max(scores[:player_count])
+    winners = [i+1 for i, v in enumerate(scores[:player_count]) if v == best]
+    if len(winners) == 1:
+        return f'Player {winners[0]} wins with {best} points.'
+    winners_text = ', '.join(str(x) for x in winners)
+    return f'Tie between players {winners_text} at {best} points.'
+
+def start_game(ev=None):
+    global running, countdown, countdown_timer
+    if running:
+        return
+    running = True
+    reset_scores()
+    countdown = 60
+    time_left.text = str(countdown)
+    message.text = 'Get ready for the first fruit!'
+    schedule_next_fruit()
+    countdown_timer = timer.set_interval(update_countdown, 1000)
+
+def reset_scores():
+    for i in range(player_count):
+        scores[i] = 0
+    draw_scores()
+
+def reset(ev=None):
+    global running, countdown, fruit_visible, fruit_timer, countdown_timer
+    running = False
+    countdown = 60
+    time_left.text = str(countdown)
+    next_delay_el.text = '0.0'
+    message.text = 'Press Start to begin. Use corner buttons or keys (A,D,W,S and arrow keys) to grab fruit.'
+    fruit_visible = False
+    if fruit_timer:
+        timer.clear_timeout(fruit_timer)
+        fruit_timer = None
+    if countdown_timer:
+        timer.clear_interval(countdown_timer)
+        countdown_timer = None
+    fruit_display.text = '?'
+    draw_scores()
+
+def on_key(ev):
+    key = ev.key.lower()
+    if key in KEY_BINDINGS and KEY_BINDINGS[key] < player_count:
+        claim(KEY_BINDINGS[key])
+
+player_count_select.bind('change', set_player_count)
+start_btn.bind('click', start_game)
+reset_btn.bind('click', reset)
+for i, btn in enumerate(player_buttons):
+    bind_claim(btn, i)
+
+set_player_count()
+draw_scores()
+document.bind('keydown', on_key)
+  </script>
+</body>
+</html>
