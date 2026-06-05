@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Snatch It!</title>
+
+<style>
+@font-face {
+    font-family: 'Chewy';
+    src: url('assets/Chewy-Regular.ttf') format('truetype');
+}
+
+body{
+    margin:0;
+    overflow:hidden;
+    font-family:'Chewy', sans-serif;
+}
+</style>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div id="gameContainer">
+
+    <!-- INTRO VIDEO -->
+    <video
+        id="introVideo"
+        class="screenVideo"
+        autoplay
+        muted
+        playsinline>
+        <source src="assets/intro.mp4" type="video/mp4">
+    </video>
+
+    <!-- HOME VIDEO -->
+    <video
+        id="homeVideo"
+        class="screenVideo hidden"
+        muted
+        playsinline>
+        <source src="assets/homepage.mp4" type="video/mp4">
+    </video>
+
+    <!-- GAME CANVAS -->
+    <canvas
+        id="gameCanvas"
+        width="1000"
+        height="700"
+        class="hidden">
+    </canvas>
+
+</div>
+
+<!-- AUDIO -->
+
+<audio id="bgMusic" loop>
+    <source src="assets/bg_music.ogg" type="audio/ogg">
+</audio>
+
+<audio id="clickSound">
+    <source src="assets/click.ogg" type="audio/ogg">
+</audio>
+
+<audio id="appleSound">
+    <source src="assets/apple.ogg" type="audio/ogg">
+</audio>
+
+<audio id="sweetSound">
+    <source src="assets/sweet.ogg" type="audio/ogg">
+</audio>
+
+<audio id="winnerSound">
+    <source src="assets/winner.ogg" type="audio/ogg">
+</audio>
+
+<script src="game.js"></script>
+
+</body>
+</html>
